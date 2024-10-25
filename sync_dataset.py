@@ -15,7 +15,7 @@ json_files = [file for file in files if file.endswith(".json")]
 
 # Load the metadata compilation 
 try: 
-    data_files = "metadata.parquet"
+    data_files = "data/train-00000-of-00001.parquet"
     metadata = load_dataset(
                             dataset_id, 
                             data_files=data_files)
