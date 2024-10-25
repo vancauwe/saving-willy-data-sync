@@ -1,7 +1,13 @@
+# OS 
+.DS_store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Folder 
+test_sync/*
 
 # C extensions
 *.so
