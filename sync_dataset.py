@@ -15,7 +15,7 @@ json_files = [file for file in files if file.endswith(".json")]
 
 # Load the metadata compilation 
 try: 
-    data_files = "data/metadata.parquet"
+    data_files = "metadata.parquet"
     metadata = load_dataset(
                             dataset_id, 
                             data_files=data_files)
@@ -26,11 +26,10 @@ try:
             new = json.load(f)
         if not(new["image_md5"] in metadata["train"]["image_md5"]):
             metadata["train"] = metadata["train"].add_item(new)
-except:
-    #for the first run
+except: 
     metadata = load_dataset(
-                            dataset_id, 
-                            data_files=json_files)
+                    dataset_id,
+                    data_files=json_files)
 
 
 metadata.push_to_hub(dataset_id, token=token)
