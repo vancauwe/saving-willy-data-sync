@@ -103,9 +103,62 @@ def append_new_to_dataset(api:HfApi, dataset_id:str, parquet_fname:str = "data/t
     n = add_json_files_to_metadata(json_files, metadata)
     print(f"Added {n} files to metadata.")
     if n > 0:
-        metadata.push_to_hub(dataset_id)
+        try:
+            metadata.push_to_hub(dataset_id) # , token=token)
+        except Exception as e:
+            print(f"Failed to push metadata to HF hub: {e}")
+            raise
         
     return metadata
+
+
+def sync_dataset(
+    api:HfApi, dataset_id:str, 
+    dataset_filename:str = "data/train-00000-of-00001.parquet",
+    create_dataset_if_not_exists:bool = False,
+    ) -> int|None:
+    '''docstring (basically: add any new files into dataset) '''
+    
+    # 0. get all the existing individual observation files (in json)
+    json_files = lookup_json_files(api, dataset_id)
+    # - if there are none, give up already
+    if not len(json_files):
+        # print a warning, and return
+        print(f"No json files found in dataset {dataset_id}.")
+        return None
+        
+    # 1. fetch the dataset (note: doesn't need authentication)
+    dataset = load_dataset(dataset_id, data_files=dataset_filename)
+
+    # if it doesn't exist, either we give up, or we create a blank 
+    if not dataset:
+        if not create_dataset_if_not_exists:
+            # print a warning, and return
+            print(f"No dataset found in {dataset_filename}.")
+            return None
+        # create a blank dataset
+        dataset = create_blank_dataset()
+        print(f"Created new blank dataset as none existed at {dataset_filename}")
+
+    else:
+        print(f"Dataset found in {dataset_filename}. Proceeding with sync.")
+
+    # 2. add the content of any new ones into the dataset
+    n = add_json_files_to_metadata(json_files, dataset)
+    # 3. push the updated one into HF hub
+    if n > 0:
+        try:
+            dataset.push_to_hub(dataset_id) # , token=token)
+        except Exception as e:
+            print(f"Failed to push dataset to HF hub: {e}")
+            raise 
+            # return
+                
+        print(f"Updated dataset with {n} new entries pushed to HF hub: {dataset_id}.")
+        
+    
+    return n
+    
 
 
 def reset_dataset_rebuild_from_json(api:HfApi, dataset_id:str) -> DatasetDict:
