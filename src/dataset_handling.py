@@ -81,10 +81,20 @@ def add_json_files_to_metadata(add_files: List[str], metadata: DatasetDict, data
         with open(file, "r") as f:
             new = json.load(f)
         
-        if ("image_md5" not in metadata["train"]) or \
-            not (new["image_md5"] in metadata["train"]["image_md5"]):
+        
+        
+        if ("image_md5" not in metadata["train"].column_names):
+            # new dataset, no 'image_md5' dict to test for keys
             metadata["train"] = metadata["train"].add_item(new)
             n += 1
+        elif new["image_md5"] not in metadata["train"]["image_md5"]:
+            # dataset exists, but this image wasn't seen before
+            metadata["train"] = metadata["train"].add_item(new)
+            n += 1
+        else:
+            # this image was seen before, so we skip it
+            print(f"Skipping {new['image_md5']} as it already exists in the dataset.")
+            
     return n
 
         
