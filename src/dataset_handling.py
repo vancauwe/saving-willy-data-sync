@@ -144,7 +144,7 @@ def sync_dataset(
         print(f"Dataset found in {dataset_filename}. Proceeding with sync.")
 
     # 2. add the content of any new ones into the dataset
-    n = add_json_files_to_metadata(json_files, dataset)
+    n = add_json_files_to_metadata(json_files, dataset, dataset_id)
     # 3. push the updated one into HF hub
     if n > 0:
         try:
@@ -188,7 +188,7 @@ def reset_dataset_rebuild_from_json(api:HfApi, dataset_id:str) -> DatasetDict:
     delete_metadata_if_exists(api, dataset_id, parquet_fname="data/train-00000-of-00001.parquet")
     metadata = create_blank_dataset()
     json_files = lookup_json_files(api, dataset_id)
-    n = add_json_files_to_metadata(json_files, metadata)
+    n = add_json_files_to_metadata(json_files, metadata, dataset_id)
     print(f"Added {n} files to metadata.")
     print(pd.DataFrame(metadata['train']))
 
