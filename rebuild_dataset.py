@@ -11,18 +11,17 @@ import os
 from huggingface_hub import HfApi
 from src.dataset_handling import reset_dataset_rebuild_from_json
 
-
 ############################################################
-dataset_id = "Saving-Willy/temp_dataset"
+dataset_ids = ["Saving-Willy/temp_dataset", "Saving-Willy/main_dataset"]
 token = os.getenv("HF_TOKEN")
-dataset_filename = "data/train-00000-of-00001.parquet"
 ############################################################
 
 if __name__ == '__main__':
     # Initialize API client
     api = HfApi(token=token)
 
-    # run the full rebuild/reset, and push to hub
-    reset_dataset_rebuild_from_json(
-        api, dataset_id)
+    for dataset_id in dataset_ids:
+        # run the full rebuild/reset, and push to hub
+        reset_dataset_rebuild_from_json(
+            api, dataset_id)
     
