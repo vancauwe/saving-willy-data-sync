@@ -1,41 +1,31 @@
-from datasets import load_dataset, DownloadMode
-import json
+'''
+This script updates any new observations into the combined dataset 
+stored on Hugging Face Hub.
+
+If the operation fails, it exits with non-zero status so the workflow
+fails too (better observability of the failures)
+'''
+
 import os 
-from huggingface_hub import HfApi , hf_hub_download
+from huggingface_hub import HfApi
+from src.dataset_handling import sync_dataset
 
+############################################################
 dataset_id = "Saving-Willy/temp_dataset"
-token = os.getenv("HUGGINGFACE_TOKEN")
+token = os.getenv("HF_TOKEN")
+dataset_filename = "data/train-00000-of-00001.parquet"
+############################################################
 
-# Initialize API client
-api = HfApi(token=token)
+if __name__ == '__main__':
+    # Initialize API client
+    api = HfApi(token=token)
 
-# Load all metadata files
-files = api.list_repo_files(dataset_id, repo_type="dataset")
-json_files = [file for file in files if file.endswith(".json")]
+    # add json files to dataset
+    n_new = sync_dataset(
+        api, dataset_id, dataset_filename, 
+        create_dataset_if_not_exists=False)
 
-# Load the metadata compilation 
-try: 
-    data_files = "data/train-00000-of-00001.parquet"
-    metadata = load_dataset(
-                            dataset_id, 
-                            data_files=data_files)
-    # Add new json entries to dataset 
-    for file in json_files: 
-        file = hf_hub_download(repo_id=dataset_id, filename=file, repo_type="dataset")
-        with open(file, "r") as f:
-            new = json.load(f)
-        if not(new["image_md5"] in metadata["train"]["image_md5"]):
-            metadata["train"] = metadata["train"].add_item(new)
-except: 
-    metadata = load_dataset(
-                    dataset_id,
-                    data_files=json_files)
-
-
-metadata.push_to_hub(dataset_id, token=token)
-
-
-
-
-
-
+    if n_new is None:
+        # something went wrong. - want the workflow to fail so nonzero exit  
+        print(f"Failed to sync dataset {dataset_id}.")
+        raise SystemExit(1) 

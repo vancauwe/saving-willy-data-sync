@@ -1,0 +1,36 @@
+# simple workflow that runs a python script to rebuild the dataset
+# it should be triggered only manually (workflow_dispatch)
+
+name: Manually Rebuild Dataset
+on:
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      environment:
+        description: 'Environment to deploy'
+        required: false
+        default: 'staging'
+jobs:
+    rebuild_dataset:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+            
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.10'
+    
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+    
+        - name: Rebuild Dataset
+          env:
+            HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          run: python rebuild_dataset.py

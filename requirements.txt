@@ -1,3 +1,6 @@
-huggingface_hub
-datasets
+huggingface_hub~=0.26.1
+datasets~=3.0.0
+pyarrow~=18.1.0
 
+# actually a bit over the top, it is just to pretty-print a table
+pandas~=2.2.3
