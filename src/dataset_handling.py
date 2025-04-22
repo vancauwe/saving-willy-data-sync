@@ -135,7 +135,7 @@ def sync_dataset(
     if not len(json_files):
         # print a warning, and return
         print(f"No json files found in dataset {dataset_id}.")
-        return None
+        return 0
         
     # 1. fetch the dataset (note: doesn't need authentication)
     dataset = load_dataset(dataset_id, data_files=dataset_filename)
