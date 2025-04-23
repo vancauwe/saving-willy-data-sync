@@ -21,6 +21,7 @@ if __name__ == '__main__':
     api = HfApi(token=token)
 
     for dataset_id in dataset_ids:
+        print(f"Syncing dataset {dataset_id}...")
         # add json files to dataset
         n_new = sync_dataset(
             api, dataset_id, dataset_filename, 
